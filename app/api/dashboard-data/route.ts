@@ -23,7 +23,6 @@ function parseCsv(csv: string): string[][] {
       else if (char === '"') quoted = false;
       else value += char;
     } else if (char === '"') quoted = true;
-    else if (char === ',') { row.push(value); value = ''; }
     else if (char === '\n') { row.push(value.replace(/\r$/, '')); rows.push(row); row = []; value = ''; }
     else value += char;
   }
@@ -43,7 +42,7 @@ export async function GET() {
     const entries = await Promise.all(Object.entries(SOURCES).map(async ([key, sheet]) => [key, await readSheet(sheet)] as const));
     return Response.json(
       { ...Object.fromEntries(entries), refreshedAt: new Date().toISOString() },
-      { headers: { 'cache-control': 'public, max-age=60, s-maxage=300' } },
+      { headers: { 'cache-control': 'no-store, no-cache, must-revalidate' } },
     );
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : 'อ่านข้อมูลไม่สำเร็จ' }, { status: 502 });
